@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">家計簿</string>
+    <string-array name="BigList">
+        <item>食費</item>
+        <item>食費外</item>
+        <item>みずほ銀行</item>
+        <item>三井住友銀行</item>
+    </string-array>
+    <string-array name="FoodList">
+        <item>昼食</item>
+        <item>夕食</item>
+        <item>飲料品</item>
+        <item>嗜好</item>
+    </string-array>
+    <string-array name="OtherList">
+        <item>書籍代</item>
+        <item>電子書籍代</item>
+        <item>音楽代</item>
+        <item>交際費</item>
+        <item>レジャー費</item>
+        <item>ゲーム代</item>
+        <item>PC関連費</item>
+        <item>その他</item>
+    </string-array>
+    <string-array name="MizuhoList">
+        <item>引き出し</item>
+        <item>預け入れ</item>
+        <item>振り込み</item>
+        <item>小遣い</item>
+    </string-array>
+    <string-array name="SumitomoList">
+        <item>引き出し</item>
+        <item>預け入れ</item>
+        <item>振り込み</item>
+        <item>引き落とし</item>
+        <item>予備項目</item>
+    </string-array>
+</resources>

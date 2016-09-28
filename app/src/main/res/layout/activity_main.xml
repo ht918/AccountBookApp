@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.schedule_adjuster.accountbookapp.MainActivity">
+
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        app:bootstrapText="支出入力"
+        android:id="@+id/openInputButton"
+        android:onClick="openInputWindow"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp" />
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        app:bootstrapText="家計簿表示"
+        android:id="@+id/openAccountBookButton"
+        android:onClick="openAccountBook"
+        android:layout_below="@id/openInputButton"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp" />
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        app:bootstrapText="dropbox更新"
+        android:id="@+id/uploadAccountBookButton"
+        android:onClick="uploadAccountBook"
+        android:layout_below="@id/openAccountBookButton"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp" />
+</RelativeLayout>

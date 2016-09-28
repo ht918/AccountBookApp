@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.schedule_adjuster.accountbookapp.InputActivity">
+
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bootstrapText="日付"
+        android:layout_margin="10dp"
+        android:id="@+id/DateText"
+        android:layout_centerHorizontal="true" />
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:layout_below="@id/DateText"
+        android:id="@+id/DateInput"
+        android:layout_marginBottom="10dp"
+        android:layout_centerHorizontal="true"/>
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bootstrapSize="md"
+        app:bootstrapText="日付選択"
+        android:id="@+id/DateButton"
+        android:onClick="openDatePicker"
+        android:layout_marginBottom="10dp"
+        android:layout_alignTop="@id/DateInput"
+        android:layout_alignEnd="@+id/DetailInput" />
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bootstrapText="大項目"
+        android:layout_margin="10dp"
+        android:id="@+id/BigText"
+        android:layout_below="@id/DateButton"
+        android:layout_centerHorizontal="true" />
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/BigListSpinner"
+        android:entries="@array/BigList"
+        android:spinnerMode="dialog"
+        android:layout_below="@id/BigText"
+        android:layout_marginBottom="10dp"
+        android:layout_centerHorizontal="true" />
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bootstrapText="小項目"
+        android:layout_margin="10dp"
+        android:id="@+id/SmallText"
+        android:layout_below="@id/BigListSpinner"
+        android:layout_centerHorizontal="true" />
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/SmallListSpinner"
+        android:entries="@array/FoodList"
+        android:spinnerMode="dialog"
+        android:layout_below="@id/SmallText"
+        android:layout_marginBottom="10dp"
+        android:layout_centerHorizontal="true" />
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bootstrapText="詳細"
+        android:layout_margin="10dp"
+        android:id="@+id/DetailText"
+        android:layout_below="@id/SmallListSpinner"
+        android:layout_centerHorizontal="true" />
+    <com.beardedhen.androidbootstrap.BootstrapEditText
+        android:layout_height="40dp"
+        android:layout_width="300dp"
+        android:layout_below="@id/DetailText"
+        app:bootstrapSize="xl"
+        android:inputType="text"
+        android:id="@+id/DetailInput"
+        android:layout_centerHorizontal="true"/>
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bootstrapText="金額"
+        android:layout_margin="10dp"
+        android:id="@+id/AmountText"
+        android:layout_below="@id/DetailInput"
+        android:layout_centerHorizontal="true" />
+    <com.beardedhen.androidbootstrap.BootstrapEditText
+        android:layout_height="40dp"
+        android:layout_width="150dp"
+        android:layout_below="@id/AmountText"
+        app:bootstrapSize="xl"
+        android:inputType="numberDecimal"
+        android:id="@+id/AmountInput"
+        android:layout_marginBottom="30dp"
+        android:layout_centerHorizontal="true"/>
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/AmountInput"
+        app:bootstrapSize="xl"
+        android:layout_centerHorizontal="true"
+        android:onClick="inputExpenseData"
+        app:bootstrapText="入力"/>
+
+</RelativeLayout>
