@@ -3,9 +3,12 @@ package com.schedule_adjuster.accountbookapp;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,7 +35,7 @@ public class InputActivity extends AppCompatActivity {
         bigSpinner = (Spinner)findViewById(R.id.BigListSpinner);
         smallSpinner = (Spinner)findViewById(R.id.SmallListSpinner);
 
-        ArrayAdapter<String> bigAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.BigList));
+        ArrayAdapter<String> bigAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.BigList));
         bigAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         final ArrayAdapter<String> foodAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,getResources().getStringArray(R.array.FoodList));
@@ -83,6 +86,53 @@ public class InputActivity extends AppCompatActivity {
                 dateText.setText(year+"/"+ (month + 1) +"/"+day);
             }
         };
+
+        /* Intentからのデータの受け取り */
+        Intent i = getIntent();
+        int dbId = i.getIntExtra("dbID",-1);
+        if(dbId >= 0){
+            final AccountDbOpenHelper accountDbOpenHelper = new AccountDbOpenHelper(this);
+            SQLiteDatabase db = accountDbOpenHelper.getReadableDatabase();
+            Cursor cursor = db.query("expenses",null,"_id=?",new String[]{Integer.toString(dbId)},null,null,null,null);
+            try{
+                if(cursor.moveToNext()){
+                    String detail = cursor.getString(cursor.getColumnIndex("detail"));
+                    String amount = cursor.getString(cursor.getColumnIndex("amount"));
+                    EditText detailEditText = (EditText)findViewById(R.id.DetailInput);
+                    EditText amountEditText = (EditText)findViewById(R.id.AmountInput);
+                    detailEditText.setText(detail);
+                    amountEditText.setText(amount);
+                    String item = cursor.getString(cursor.getColumnIndex("big"));
+                    int bigPosition = bigAdapter.getPosition(item);
+                    bigSpinner.setSelection(bigPosition);
+                    int smallPosition = 0;
+                    String smallItem = cursor.getString(cursor.getColumnIndex("small"));
+                    Log.d("Item",item + " / " + smallItem + getResources().getStringArray(R.array.BigList)[1]);
+                    if(item.equals(getResources().getStringArray(R.array.BigList)[0])){
+                        smallPosition = foodAdapter.getPosition(smallItem);
+                    }else if(item.equals(getResources().getStringArray(R.array.BigList)[1])){
+                        smallPosition = otherAdapter.getPosition(smallItem);
+                    }else if(item.equals(getResources().getStringArray(R.array.BigList)[2])){
+                        smallPosition = mizuhoAdapter.getPosition(smallItem);
+                    }else if(item.equals(getResources().getStringArray(R.array.BigList)[3])){
+                        smallPosition = sumitomoAdapter.getPosition(smallItem);
+                    }
+                    Log.d("smallPosition",Integer.toString(smallPosition));
+                    final int finalSmallPosition = smallPosition;
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            smallSpinner.setSelection(finalSmallPosition);
+                        }
+                    },500);
+                    dateText.setText(cursor.getString(cursor.getColumnIndex("date")));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
     }
 
     public void openDatePicker(View view){
