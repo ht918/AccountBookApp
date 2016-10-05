@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.RESTUtility;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AccessTokenPair;
@@ -23,12 +24,16 @@ import com.dropbox.client2.session.WebOAuth2Session;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +56,36 @@ public class MainActivity extends AppCompatActivity {
             mDBApi.getSession().startOAuth2Authentication(this);
         }else{
             mDBApi = new DropboxAPI<>(loadAndroidAuthSession());
+        }
+        try {
+
+            String tmpCsvPath = Environment.getExternalStorageDirectory().getPath() + "/tmp.csv";
+            File inputFile = new File(tmpCsvPath);
+            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+            String dropboxData = reader.readLine();
+            Log.d("Filesize",Long.toString(inputFile.length()));
+            Log.d("dropboxData",dropboxData);
+            if(!StringUtils.isEmpty(dropboxData)) {
+                String[] amountStrings = dropboxData.split(",");
+                int walletAmount, mizuhoAmount, sumitomoAmount;
+                walletAmount = Integer.parseInt(amountStrings[0]);
+                mizuhoAmount = Integer.parseInt(amountStrings[1]);
+                sumitomoAmount = Integer.parseInt(amountStrings[2]);
+                SharedPreferences preferences = getSharedPreferences("AMOUNT_DATA", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("wallet", walletAmount);
+                editor.putInt("mizuho", mizuhoAmount);
+                editor.putInt("sumitomo", sumitomoAmount);
+                editor.commit();
+                TextView walletAmountText = (TextView) findViewById(R.id.walletAmount);
+                walletAmountText.setText(amountStrings[0] + "円");
+                TextView mizuhoAmountText = (TextView) findViewById(R.id.mizuhoAmount);
+                mizuhoAmountText.setText(amountStrings[1] + "円");
+                TextView sumitomoAmountText = (TextView) findViewById(R.id.sumitomoAmount);
+                sumitomoAmountText.setText(amountStrings[2] + "円");
+            }
+        }catch(IOException ioe){
+            Log.e("ioe",ioe.toString());
         }
     }
 
@@ -131,19 +166,29 @@ public class MainActivity extends AppCompatActivity {
         final File file = new File(tmpCsvPath);
         try {
             final FileOutputStream os = new FileOutputStream(file, false);
+            final Handler handler = new Handler();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try{
-                        mDBApi.getFile("/account-book.csv",null,os,null);
-                    }catch(DropboxException dbe){
-                        Log.e("DropboxException",dbe.toString());
+                        if(RESTUtility.parseDate(mDBApi.metadata("account-book.csv",1,null,true,null).modified).compareTo(new Date(file.lastModified())) > 0){
+                            mDBApi.getFile("/account-book.csv",null,os,null);
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MainActivity.this,"更新完了",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    }catch(DropboxException dbe) {
+                        Log.e("DropboxException", dbe.toString());
                     }
                 }
             }).start();
         }catch(IOException ioe){
             Log.e("IOE",ioe.toString());
         }
+
     }
 
     private AndroidAuthSession loadAndroidAuthSession() {

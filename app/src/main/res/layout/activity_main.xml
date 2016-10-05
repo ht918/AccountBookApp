@@ -37,4 +37,43 @@
         android:layout_below="@id/openAccountBookButton"
         android:layout_centerHorizontal="true"
         android:layout_margin="20dp" />
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/uploadAccountBookButton"
+        android:id="@+id/wallet"
+        android:layout_centerHorizontal="true"
+        app:bootstrapText="財布残高"/>
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/wallet"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/walletAmount" />
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/walletAmount"
+        android:id="@+id/mizuho"
+        android:layout_centerHorizontal="true"
+        app:bootstrapText="みずほ銀行残高"/>
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/mizuho"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/mizuhoAmount"/>
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/mizuhoAmount"
+        android:id="@+id/sumitomo"
+        android:layout_centerHorizontal="true"
+        app:bootstrapText="三井住友銀行残高"/>
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sumitomo"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/sumitomoAmount"/>
 </RelativeLayout>

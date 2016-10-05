@@ -144,6 +144,7 @@ public class InputActivity extends AppCompatActivity {
     }
 
     public void inputExpenseData(View view){
+        /* db保存処理 */
         AccountDbOpenHelper accountDbOpenHelper = new AccountDbOpenHelper(this);
         SQLiteDatabase db = accountDbOpenHelper.getWritableDatabase();
 
@@ -161,8 +162,15 @@ public class InputActivity extends AppCompatActivity {
 
         long id = db.insert("expenses",null,values);
 
+        /* 残高更新処理 */
+        if(bigSpinner.getSelectedItemPosition() < 2){
+
+        }
+
         detail.setText("");
         amount.setText("");
+
+
         Toast.makeText(this,"入力完了",Toast.LENGTH_SHORT).show();
 
         Intent i = new Intent(this,MainActivity.class);
