@@ -4,14 +4,17 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -19,8 +22,9 @@ import android.widget.TextView;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 
-public class BookActivity extends AppCompatActivity {
+public class BookActivity extends AccountBookActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +74,7 @@ public class BookActivity extends AppCompatActivity {
                         SQLiteDatabase db = accountDbOpenHelper.getWritableDatabase();
                         db.beginTransaction();
                         try{
+                            resetExpense(itemId,db);
                             db.delete("expenses","_id=?",new String[]{Integer.toString(itemId)});
                             db.setTransactionSuccessful();
                         }finally {
@@ -93,6 +98,7 @@ public class BookActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
-
     }
+
+
 }

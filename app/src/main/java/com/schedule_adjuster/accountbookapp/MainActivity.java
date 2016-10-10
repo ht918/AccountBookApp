@@ -35,7 +35,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AccountBookActivity {
 
     final static private String APP_KEY = "wambvzsih5yvgox";
     final static private String APP_SECRET = "4gm2tjj3htbkw1u";
@@ -57,36 +57,7 @@ public class MainActivity extends AppCompatActivity {
         }else{
             mDBApi = new DropboxAPI<>(loadAndroidAuthSession());
         }
-        try {
-
-            String tmpCsvPath = Environment.getExternalStorageDirectory().getPath() + "/tmp.csv";
-            File inputFile = new File(tmpCsvPath);
-            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-            String dropboxData = reader.readLine();
-            Log.d("Filesize",Long.toString(inputFile.length()));
-            Log.d("dropboxData",dropboxData);
-            if(!StringUtils.isEmpty(dropboxData)) {
-                String[] amountStrings = dropboxData.split(",");
-                int walletAmount, mizuhoAmount, sumitomoAmount;
-                walletAmount = Integer.parseInt(amountStrings[0]);
-                mizuhoAmount = Integer.parseInt(amountStrings[1]);
-                sumitomoAmount = Integer.parseInt(amountStrings[2]);
-                SharedPreferences preferences = getSharedPreferences("AMOUNT_DATA", MODE_PRIVATE);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt("wallet", walletAmount);
-                editor.putInt("mizuho", mizuhoAmount);
-                editor.putInt("sumitomo", sumitomoAmount);
-                editor.commit();
-                TextView walletAmountText = (TextView) findViewById(R.id.walletAmount);
-                walletAmountText.setText(amountStrings[0] + "円");
-                TextView mizuhoAmountText = (TextView) findViewById(R.id.mizuhoAmount);
-                mizuhoAmountText.setText(amountStrings[1] + "円");
-                TextView sumitomoAmountText = (TextView) findViewById(R.id.sumitomoAmount);
-                sumitomoAmountText.setText(amountStrings[2] + "円");
-            }
-        }catch(IOException ioe){
-            Log.e("ioe",ioe.toString());
-        }
+        updateAmountView();
     }
 
     public void openInputWindow(View view){
@@ -162,23 +133,59 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("DbAuthLog", "Error authenticating", e);
             }
         }
+
+        /* csv更新処理 */
         String tmpCsvPath = Environment.getExternalStorageDirectory().getPath() + "/tmp.csv";
         final File file = new File(tmpCsvPath);
         try {
+            final Long fileSize = file.length();
+            Log.d("File size v1",Long.toString(fileSize));
             final FileOutputStream os = new FileOutputStream(file, false);
             final Handler handler = new Handler();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try{
-                        if(RESTUtility.parseDate(mDBApi.metadata("account-book.csv",1,null,true,null).modified).compareTo(new Date(file.lastModified())) > 0){
+                        final Long dropboxUpdate = RESTUtility.parseDate(mDBApi.metadata("/account-book.csv",1,null,true,null).modified).getTime();
+                        Long localUpdate = file.lastModified();
+                        if(dropboxUpdate > localUpdate || fileSize == 0){
                             mDBApi.getFile("/account-book.csv",null,os,null);
                             handler.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     Toast.makeText(MainActivity.this,"更新完了",Toast.LENGTH_SHORT).show();
-                                }
+                                    /* 残高更新処理 */
+                                    try {
+                                        String tmpCsvPath = Environment.getExternalStorageDirectory().getPath() + "/tmp.csv";
+                                        File inputFile = new File(tmpCsvPath);
+                                        BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+                                        String dropboxData = reader.readLine();
+                                        Log.d("Filesize",Long.toString(inputFile.length()));
+                                        Log.d("dropboxData",dropboxData);
+                                        if(!StringUtils.isEmpty(dropboxData)) {
+                                            String[] amountStrings = dropboxData.split(",");
+                                            int walletAmount, mizuhoAmount, sumitomoAmount;
+                                            walletAmount = Integer.parseInt(amountStrings[0]);
+                                            mizuhoAmount = Integer.parseInt(amountStrings[1]);
+                                            sumitomoAmount = Integer.parseInt(amountStrings[2]);
+                                            SharedPreferences preferences = getSharedPreferences("AMOUNT_DATA", MODE_PRIVATE);
+                                            if(dropboxUpdate > preferences.getLong("update",0)) {
+                                                SharedPreferences.Editor editor = preferences.edit();
+                                                editor.putInt("wallet", walletAmount);
+                                                editor.putInt("mizuho", mizuhoAmount);
+                                                editor.putInt("sumitomo", sumitomoAmount);
+                                                Date date = new Date();
+                                                editor.putLong("update",date.getTime());
+                                                editor.commit();
+                                                updateAmountView();
+                                            }
+                                        }
+                                    }catch(IOException ioe){
+                                        Log.e("ioe",ioe.toString());
+                                    }                                }
                             });
+                        }else{
+                            Log.e("Not download","local data is up to date");
                         }
                     }catch(DropboxException dbe) {
                         Log.e("DropboxException", dbe.toString());
@@ -188,7 +195,16 @@ public class MainActivity extends AppCompatActivity {
         }catch(IOException ioe){
             Log.e("IOE",ioe.toString());
         }
+    }
 
+    public void updateAmountView(){
+        SharedPreferences sharedPreferences = getSharedPreferences("AMOUNT_DATA",MODE_PRIVATE);
+        TextView walletAmountText = (TextView) findViewById(R.id.walletAmount);
+        walletAmountText.setText(sharedPreferences.getInt("wallet",0) + "円");
+        TextView mizuhoAmountText = (TextView) findViewById(R.id.mizuhoAmount);
+        mizuhoAmountText.setText(sharedPreferences.getInt("mizuho",0) + "円");
+        TextView sumitomoAmountText = (TextView) findViewById(R.id.sumitomoAmount);
+        sumitomoAmountText.setText(sharedPreferences.getInt("sumitomo",0) + "円");
     }
 
     private AndroidAuthSession loadAndroidAuthSession() {
@@ -214,13 +230,10 @@ public class MainActivity extends AppCompatActivity {
         edit.putString(ACCESS_KEY_NAME, key);
         edit.commit();
     }
-    /**
-     * Preference の Key を削除する
-     */
-    private void clearKeys() {
-        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor edit = prefs.edit();
-        edit.clear();
-        edit.commit();
+
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+        updateAmountView();
     }
 }

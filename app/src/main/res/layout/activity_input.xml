@@ -98,10 +98,10 @@
         android:layout_width="150dp"
         android:layout_below="@id/AmountText"
         app:bootstrapSize="xl"
-        android:inputType="numberDecimal"
         android:id="@+id/AmountInput"
         android:layout_marginBottom="30dp"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:inputType="numberSigned" />
     <com.beardedhen.androidbootstrap.BootstrapButton
         android:layout_width="200dp"
         android:layout_height="wrap_content"

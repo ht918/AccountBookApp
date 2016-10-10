@@ -3,6 +3,7 @@ package com.schedule_adjuster.accountbookapp;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
@@ -18,9 +19,10 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.Calendar;
+import java.util.Date;
 
 
-public class InputActivity extends AppCompatActivity {
+public class InputActivity extends AccountBookActivity {
 
     private Spinner bigSpinner,smallSpinner;
 
@@ -144,28 +146,70 @@ public class InputActivity extends AppCompatActivity {
     }
 
     public void inputExpenseData(View view){
+
         /* db保存処理 */
         AccountDbOpenHelper accountDbOpenHelper = new AccountDbOpenHelper(this);
         SQLiteDatabase db = accountDbOpenHelper.getWritableDatabase();
 
-        EditText detail = (EditText)findViewById(R.id.DetailInput);
-        EditText amount = (EditText)findViewById(R.id.AmountInput);
-        EditText date = (EditText)findViewById(R.id.DateInput);
+        EditText detail = (EditText) findViewById(R.id.DetailInput);
+        EditText amount = (EditText) findViewById(R.id.AmountInput);
+        EditText date = (EditText) findViewById(R.id.DateInput);
 
         ContentValues values = new ContentValues();
-        values.put("big",(String)bigSpinner.getSelectedItem());
-        values.put("small",(String)smallSpinner.getSelectedItem());
-        values.put("detail",detail.getText().toString());
-        values.put("amount",Integer.valueOf(amount.getText().toString()));
-        values.put("upload",0);
-        values.put("date",date.getText().toString());
+        values.put("big", (String) bigSpinner.getSelectedItem());
+        values.put("small", (String) smallSpinner.getSelectedItem());
+        values.put("detail", detail.getText().toString());
+        values.put("amount", Integer.valueOf(amount.getText().toString()));
+        values.put("upload", 0);
+        values.put("date", date.getText().toString());
 
-        long id = db.insert("expenses",null,values);
+        /* 更新かを判別 */
+        Intent getI = getIntent();
+        int dbId = getI.getIntExtra("dbID",-1);
+
+        if(dbId < 0) {
+            /* insert */
+            long id = db.insert("expenses", null, values);
+        }else{
+            resetExpense(dbId,db);
+            /* update */
+            db.update("expenses",values,"_id=?",new String[]{String.valueOf(dbId)});
+        }
 
         /* 残高更新処理 */
+        SharedPreferences sharedPreferences = getSharedPreferences("AMOUNT_DATA",MODE_PRIVATE);
+        int wallet,mizuho,sumitomo,amountInt;
+        wallet = sharedPreferences.getInt("wallet",0);
+        mizuho = sharedPreferences.getInt("mizuho",0);
+        sumitomo = sharedPreferences.getInt("sumitomo",0);
+        amountInt = Integer.valueOf(amount.getText().toString());
         if(bigSpinner.getSelectedItemPosition() < 2){
-
+            wallet -= amountInt;
+        }else if(smallSpinner.getSelectedItemId() == 0){ //引き出し
+            wallet += amountInt;
+            if(bigSpinner.getSelectedItemId() == 2) mizuho -= amountInt;
+            else sumitomo -= amountInt;
+        }else if(smallSpinner.getSelectedItemId() == 1){ //預け入れ
+            wallet -= amountInt;
+            if(bigSpinner.getSelectedItemId() == 2) mizuho += amountInt;
+            else sumitomo += amountInt;
+        }else if(smallSpinner.getSelectedItemId() == 2){ //振り込み
+            if(bigSpinner.getSelectedItemId() == 2) mizuho -= amountInt;
+            else sumitomo -= amountInt;
+        }else if(smallSpinner.getSelectedItemId() == 3){
+            if(bigSpinner.getSelectedItemId() == 2) mizuho += amountInt; //小遣い
+            else sumitomo -= amountInt; //引き落とし
         }
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("wallet",wallet);
+        editor.putInt("mizuho",mizuho);
+        editor.putInt("sumitomo",sumitomo);
+        Date updateDate = new Date();
+        editor.putLong("update",updateDate.getTime());
+        editor.commit();
+
+        Log.d("update",String.valueOf(updateDate.getTime()));
 
         detail.setText("");
         amount.setText("");
